@@ -1,0 +1,186 @@
+1- Faça um programa estruturado (fluxograma e programa-fonte) em Assembly, utilizando o
+microcontrolador 8031, que transforme o buffer de memória em números pares sempre que um
+byte desse buffer for menor ou igual a 7Ah. Os endereços inicial e final do buffer são 3Ah e 68h,
+respectivamente.
+
+PARES:	MOV	R0,#3Ah
+	MOV	R1,#2Fh
+ETAPA2:	MOV	A,@RO
+	CLR	C
+	SUBB	A,#7Bh
+	JNC	ETAPA1
+	MOV	A,@RO
+	JNB	ACC.0,ETAPA1
+	CLR	ACC.0
+	MOV	@R0,A
+ETAPA1:	INC	R0
+	RET	
+SROTINA:	ACALL	PARES
+	END	
+
+2- Faça um programa estraturado (fluxograma e programa-fonte) em Assembly, utilizando o
+microcontrolador 8051, que calcule a quantidade de números que apresentam o bit 5 igual a 1,
+do buffer de memória que vai da posição de memória 15h à posição 31h. O resultado deve ser
+colocado no conteúdo do registrador R2 do penúltimo banco de registradores. Esse mesmo
+programa deve determinar o menor número do buffer de memória que vai da posição de
+memória 34h à posição 52h. O resultado deve ser colocado no conteúdo da posição de memória
+cujo endereço é 69h.
+
+NMENOR:	MOV	PSW,#00h
+	MOV	R0,#34h
+	MOV	R1,#1Fh
+	MOV	69h,#0FFh
+	MOV	A,@R0
+	MOV	69h,A
+	INC	R0
+ETAPA5:	MOV	A,@R0
+	CLR	C
+	SUBB	A,69h
+	JNC	ETAPA4
+	MOV	69h,A
+ETAPA4:	INC	R0
+	DJNZ	R1,ETAPA5
+	RET	
+ETAPA3:	MOV	PSW,#10h
+	MOV	R0,#15h
+	MOV	R1,#10h
+	MOV	R2,#00h
+ETAPA2:	MOV	A,@R0
+	JNB	ACC.5,ETAPA1
+	INC	R2
+ETAPA1:	INC	R0
+	DJNZ	R1,ETAPA2
+	RET	
+SROTINA:ACALL	NMENOR
+	ACALL	ETAPA3
+	END	
+
+3- Faça um programa estruturado (fluxograma e programa-fonte) em Assembly, utilizando o
+microcontrolador 8051, que:
+a) determine o maior número do buffer de memória que vai da posição de memória 34h à
+posição 61h. O resultado deve ser acrescentado ao conteúdo do registrador R7 do segundo
+banco de registradores;
+b) determine a quantidade de números maiores que 77h do buffer de memória que vai da
+posição de memória 4Ah a 71h. O resultado deve ser acrescentado ao conteúdo do
+registrador B;
+c) Transforme o buffer de memória em números que apresentam o bit 2 igual a 1, sempre que
+um byte desse buffer for igual a ABh. Os endereços inicial e final do buffer são 4Ah e 77h,
+respectivamente.
+
+
+BIT2=1:	MOV	R0,#4Ah
+	MOV	R1,#2Eh
+ETAPA6:	MOV	A,@R0
+	CJNE	A,#0ABh,ETAPA5
+	SETB	ACC.2
+	MOV	@R0,A
+ETAPA5:	INC	R0
+	DJNZ	R1,ETAPA6
+	RET	
+MA77h:	MOV	R0,#4Ah
+	MOV	R1,#28h
+	MOV	B,#00h
+ETAPA4:	MOV	A,@R0
+	CLR	C
+	SUBB	A,78h
+	JC	ETAPA3
+	INC	B
+ETAPA3:	INC	R0
+	DJNZ	R1,ETAPA4
+	RET	
+MANB:	MOV	PSW,#08h
+	MOV	R0,#34h
+	MOV	R1,#2Eh
+	MOV	R7,#00h
+ETAPA2:	MOV	A,@R0
+	CLR	C
+	SUBB	A,R7
+	JC	ETAPA1
+	MOV	R7,@R0
+ETAPA1:	INC	R0
+	DJNZ	R1,ETAPA2
+	RET	
+SROTINA:	ACALL	BIT2=1
+	ACALL	MA77h
+	ACALL	MANB
+	END	
+
+
+4- Faça um programa estruturado (fluxograma e programa-fonte) em Assembly, utilizando o
+microcontrolador 8031, que calcule a quantidade de números maiores que 22h do buffer de
+memória que vai da posição de memória 33h à posição 41h. O resultado deve ser colocado no
+conteúdo do registrador R1 do segundo banco de registradores. O programa também deve
+calcular a quantidade de números que apresentam o bit 6 igual a 0 e o bit 2 igual a 1m do buffer
+de memória que vai da posição de memória 45h à posição 51h. O resultado ser colocado no
+conteúdo da posição de memória cujo endereço é 3Ch. O programa também deve calcular a
+quantidade de números maiores que 65h e que o bit 4 seja igual a 1 do buffer de memória que
+vai da posição de memória 5Fh a 7Eh. O resultado deve ser colocad o no conteúdo da posição
+de memória cujo endereço é 7Dh.
+
+
+QNM65h:	MOV	R0,#5Fh
+	MOV	R2,#20h
+	MOV	R1,#7Dh
+	MOV	7Dh,#00h
+ETAPA6:	MOV	A,@R0
+	CLR	C
+	SUBB	A,#66h
+	JC	ETAPA5
+	MOV	A,@R0
+	JNB	ACC.4,ETAPA5
+	INC	7Dh
+ETAPA5:	INC	R0
+	DJNZ	R2,ETAPA6
+	RET	
+BIT6=0/2=1:	MOV	PSW,#00h
+	MOV	R0,#45h
+	MOV	R1,#00h
+	MOV	3Ch,#00h
+ETAPA4:	MOV	A,@R0
+	JB	ACC.6,ETAPA3
+	JNB	ACC.2,ETAPA3
+	INC	3Ch
+ETAPA3:	INC	R0
+	DJNZ	R1,ETAPA4
+	RET	
+QNM22h:	MOV	PSW,#08h
+	MOV	R0,#33h
+	MOV	R2,#0Fh
+	MOV	R1,#00h
+ETAPA2:	MOV	A,@R0
+	CLR	C
+	SUBB	A,#23h
+	JC	ETAPA1
+	INC	R1
+ETAPA1:	INC	R0
+	DJNZ	R2,ETAPA2
+	RET	
+SROTINA:	ACALL	QNM65h
+	ACALL	BIT6=0/2=1
+	ACALL	QNM22h
+	END	
+
+5- Faça um programa estruturado (fluxograma e programa-fonte) em Assembly, utilizando o
+microcontrolador 8051, que realize a operação lógica OR-Exclusivo entre dois buffers de
+memória. O primeiro buffer vai do endereço 21h a 35h. O segundo buffer começa a partir da
+posição de memória 36h. O resultado da operação lógica entre esses dois buffers de memória
+deve ser colocado em um outro buffer, cujo endereço inicial é 65h. Transforme o buffer
+resultante em númeque apresentam o bit 6 igual a 0.
+
+OREXCLUSIVO:	MOV	R0,#21h
+	MOV	R1,#36h
+	MOV	R2,#65h
+ETAPA1:	MOV	A,@R0
+	XRL	A,@R1
+	MOV	R7,R0
+	MOV	R0,R2
+	CLR	ACC.6
+	MOV	@R0,A
+	MOV	R0,R7
+	INC	R2
+	INC	R1
+	INC	R0
+	CJNE	R0,#36h,ETAPA1
+	RET	
+SROTINA:	ACALL	OREXCLUSIVO
+	END	

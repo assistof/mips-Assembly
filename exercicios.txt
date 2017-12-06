@@ -1,0 +1,215 @@
+1-Faça um programa que execute a rotação de um bit do conteùdo da posição de memória cujo endereço
+é 26h. O resultado deve ser somado juntamente com o carry ao conteúdo da posiçõa de memória cujo endereço é 44h.
+Com o resultado faça uma operação lógica OR-EX com constante 7Dh. O resultado deve ser armazenado no conteúdo da posição
+de memória cujo endereço é 48h.
+
+MOV	A,26h
+RR	A
+ADDC	A,44h
+XRL	A,#7h
+MOV	48h,A
+
+2-Executa a operação de adição com carry entre dois bytes. O primeiro byte está localizado no conteúdo do registrador R3 do terceiro banco de registradores
+e o outro byte no conteúdo da posição de memória 38h. O resultado deve ser armazenado no conteúdo registrador R2 do segundo banco de registradores.
+
+MOV	PSW,#10h
+MOV	A,R3
+ADDC	A,38h
+MOV	PSW,#01h
+MOV	R2,A
+
+3-faz uma operaçõa lógica OR-EX entre o conteúdo da posição de memória cujo endereço é 25h e com o conteúdo do registrador R5
+do penultimo banco de registradores. O resultado obtido deve ser multiplicado por 4, adicionado ao valor 37h e dividido por 8.
+O resultado deve ser armazenado no conteúdo do registrador R1.
+
+MOV	PSW,#10h
+MOV	A,25h
+ORL	A,R5
+MOV	B,#04h
+MUL	AB
+ADD	A,#37h
+MOV	B,#08h
+DIV	AB
+MOV	PSW,#01h
+MOV	R1,A
+END	
+
+4-cALCULA A QUANTIDADE DE NÚMEROS POSITIVOS DE UM BUFFER QUE VAI DO ENDEREÇO 36h e final 74h. O resultado deve ser armazenado no conteúdo da posição de memória cujo endereço é 1Bh.
+
+	MOV	R0,#36H
+	MOV	R1,#3Fh
+	MOV	1Bh,#00h
+PASSO1:	MOV	A,@R0
+	JB	ACC.7,PASSO2
+	INC	1Bh
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	END	
+
+5-Calcula a quantidade de numeros negativosde um buffer que vai do endereço 59h até o 71h. O resultado deve ser armazenado no conteúdo da posição 
+de memória cujo endereço é 4Fh.
+
+	MOV	R0,#59H
+	MOV	R1,#19h
+	MOV	4Fh,#00h
+PASSO1:	MOV	A,@R0
+	JNB	ACC.7,PASSO2
+	INC	4Fh
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	END	
+
+6-Calcula a quantidade de números que apresentam paridade ímpar de um buffer de memória que vai do endereço 2Eh até o endereço 64h. O resultado
+deve ser armazenado no conteúdo da posição de memória cujo endereço é 12h.
+
+	MOV	R0,#2EH
+	MOV	R1,#37h
+	MOV	12h,#00h
+PASSO1:	MOV	A,@R0
+	JNB	PSW.0,PASSO1
+	INC	12h
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	END	
+
+7-Calcula a quantidade de números que apresentam paridade par e são diferentes de 56h de um buffer de memória que vai do endereço 49h até o endereço 71h. 
+O resultado deve ser armazenado no conteúdo da posição de memória cujo endereço é 79h.
+
+
+	MOV	R0,#49h
+	MOV	R1,#29h
+	MOV	79h,#00h
+PASSO1:	MOV	A,@R0
+	JB	PSW.0,PASSO1
+	CLR	C
+	SUBB	A,#56h
+	JZ	PASSO2
+	INC	79h
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	END	
+
+8-Calcula a quantidade de números diferentes de zero, que apresentam o bit 5 igual a um e que são negativos de um buffer de memória que vai do endereço 2Bh
+até o endereço 39h. O resultado deve ser armazenado no conteúdo da posição de memória cujo endereço é 6Fh.
+
+	MOV	R0,#2Bh
+	MOV	R1,#0Eh
+	MOV	6Fh,#00h
+PASSO1:	MOV	A,@R0
+	CLR	C
+	SUBB	A,#00h
+	JZ	PASSO1
+	JNB	ACC.5,PASSO2
+	JNB	ACC.7,PASSO2
+	INC	6Fh
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	END	
+
+9-Transforma o buffer do exercicio 8 em números negativos, somente aqueles elementos do buffer que são positivos e apresentam o bit 5 igual a 0.
+
+	MOV	R0,#2Bh
+PASSO1:	MOV	A,@R0
+	JNB	ACC.5,PASSO2
+	JNB	ACC.7,PASSO2
+	CPL	A
+	ADD	A,#01h
+	MOV	@R0,A
+PASSO2:	INC	R0
+	CJNE	R0,#3Ah,PASSO1
+	END	
+10-Transforma o buffer de memória do exercicio 8 em números ímpares. Apenas aqueles elementos que apresentam paridade ímpar, o bit 1 igual a 1 e são 
+menores que 44h.
+
+	MOV	R0,#2Bh
+PASSO1:	MOV	A,@R0
+	JNB	PSW.0,PASSO2
+	JNB	ACC.1,PASSO2
+	CLR	C
+	SUBB	A,#44h
+	JNC	PASSO2
+	ADD	A,#01h
+PASSO2:	INC	R0
+	CJNE	R0,#3Ah,PASSO1
+	END	
+11-Copia o conteúdo do buffer de memória do exercicio 8 para um buffer de memória cujo endereço inicial é 4Ah.
+
+	MOV	R0,#2Bh
+	MOV	R1,#4Ah
+PASSO1:	MOV	A,@R0
+	INC	R1
+	INC	R0
+	CJNE	R0,#3Ah,PASSO1
+	END	
+
+12-Faz a operação lógica OR-EX dos elementos do buffer de memória do exercício 8. O resultado deve ser armazenado no conteúdo do regsitrador R0 do primeiro
+banco de registradores.
+
+	MOV	R0,#2Bh
+	MOV	A,@R0
+	INC	R0
+PASSO1:	XRL	A,@R0
+	INC	R0
+	CJNE	R0,#3Ah,PASSO1
+	CLR	PSW
+	MOV	R0,A
+	END	
+13-Faz a operação de subtração entre dois buffers de memória. O primeiro buffer de memória começa no endereço 13h e termina em 2Ah. O endereço inical do segundo buffer de memória é 34h. 
+O resultado deve ser colocado num buffer de memória cujo endereço inicial é 56h.
+
+	MOV	R0,#13h
+	MOV	R1,#34h
+	MOV	R2,#56h
+PASSO1:	MOV	A,@R0
+	CLR	C
+	SUBB	A,@R1
+	MOV	@R2,A
+	INC	R2
+	INC	R1
+	INC	R0
+	CJNE	R0,#2Bh,PASSO1
+	END	
+
+14-calcula a quantidade de números iguais a FFh de uma faixa de memória(buffer de memória) que vai do conteúdo da posição
+de memória cujo endereço é 60h ao conteudo da posição de memória cujo endereço é 64h. O resultado deve ser armazenado no
+conteúdo da posição de memória cujo endereço é 65h.
+
+SUB1:	MOV	R0,#60h
+	MOV	R1,#05h
+	MOV	65h,#00h
+PASSO1:	MOV	A,@R0
+	CLR	C
+	SUBB	A,#0FFh
+	JNZ	PASSO2
+	INC	65h
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	END	
+		
+PROG:	MOV	PSW,#00h
+	MOV	SP,#70h
+	ACALL	SUB1
+	END	
+
+15-Soma os bytes dos conteudos das posições de memória do buffer de memória que vai do endereço 40h ao endereço 50h.
+Considere que o resultado dessa soma pode ser maior que 255(10). A parte menos significativa do resultado deve ser 
+armazenada no conteúdo da posiçõa de memória cujo endereço é 51h e a parte mais significativa do resultado deve ser 
+armazenada no conteudo da posição de memóriacujo endereço é 52h.
+
+SOMA:	MOV	R0,#40h
+	MOV	R1,#11h
+	MOV	A,#00h
+	MOV	52h,A
+PASSO1:	ADD	A,@R0
+	JNC	PASSO2
+	INC	52h
+PASSO2:	INC	R0
+	DJNZ	R1,PASSO1
+	MOV	51h, A
+	RET	
+		
+PROG:	MOV	PSW,#00h
+	MOV	SP,#60h
+	ACALL	SOMA
+	END	
+

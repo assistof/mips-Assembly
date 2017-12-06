@@ -1,0 +1,370 @@
+1 - Apresente apenas O programa-fonte que identifica o número da chave acionada
+
+TEMPO: 	MOV	R0,#CONSTANTE1
+PASSO1:	MOV	R1,#CONSTANTE2
+	DJNZ	R1,$
+	DJNZ	R0,PASSO1
+	RET	
+		
+WAIT1:	MOV	A,#0FFh
+	CLR	C
+	SUBB	A,P1
+	JZ	WAIT1
+	ACALL	TEMPO
+	MOV	A,#0FFh
+	CLR	C
+	SUBB	A,P1
+	JZ	WAIT1
+	MOV	R2,#00h
+	MOV	A,P1
+PASSO2:	RRC	A
+	JNC	OK
+	INC	R2
+	SJMP	PASSO2
+OK:	END	
+
+2.1- Faça um programa estruturado que mostre um contador binário decrescente nos leds, sempre que a
+chave 2 for acionada (considerar o bounce). A informação sobre a contagem deve ser mostrada durante um
+período de 0,[número do seu grupo] segundo no conjunto de leds.
+
+.Cálculo para a rotina de 0.9s (TEMPO2):		
+				
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))
+				
+Sendo  Tt=0.9s e considerando (R1) e (R2)=256:	
+				
+R0=6.82-->7       0000011b		
+				
+.Cálculo  do tempo de BOUNCE (TEMPO1):	
+				
+Tt=[2+5(R0)+3(R0)(R1)].10^(-6)		
+				
+Sendo  Tt=10ms e considerando (R1)=256:	
+				
+R0=13-->   00001101b		
+
+
+TEMPO2:	MOV	R0,#07h
+PASSO1:	MOV	R1,#00h
+PASSO2:	MOV	R2,#00h
+	DJNZ	R2,$
+	DJNZ	R1,PASSO2
+	DJNZ	R0,PASSO1
+	RET	
+		
+TEMPO1:	MOV	R0,#0FFh
+PASSO3:	MOV	R1,#00h
+	DJNZ	R1,$
+	DJNZ	R0,PASSO3
+	RET	
+		
+PROGRAM:	MOV	P0,#0FFh
+	MOV	P1,#00h
+	MOV	A,#00h
+PASSO4:	JB	P0.2,PASSO4
+	ACALL	TEMPO1
+	JB	P0.2,PASSO4
+PASSO5:	MOV	P1.A
+	ACALL	TEMPO2
+	DEC	A
+	JNZ	PASSO5
+	SJMP	PASSO4
+	END	
+
+2.2 - Faça um programa estruturado que mostre um contador decimal crescente nos leds, sempre que as
+chaves 2 e 4 forem acionadas (considerar o bounce) e desacionadas. A informação da contagem deve ser
+mostrada durante um período de 0,2 + 0,[número do seu grupo] segundo no conjunto de leds em modo
+piscante.
+
+.Cálculo para a rotina de 1.1s (TEMPO2):		
+				
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))
+				
+Sendo  Tt=1.1s e considerando (R1) e (R2)=256:	
+				
+R0=8       00001000b		
+				
+.Cálculo  do tempo de BOUNCE (TEMPO):		
+				
+Tt=[2+5(R0)+3(R0)(R1)].10^(-6)		
+				
+Sendo  Tt=10ms e considerando (R1)=256:	
+				
+R0=13-->   00001101b		
+
+
+TEMPO:	MOV	R0,#0Dh	
+	MOV	R1,#00h	
+	DJNZ	R0,PASSO1	
+	RET		
+			
+TEMPO2:	MOV	RO,#06h	
+	MOV	R1,#00h	
+	MOV	R2,#00h	
+	DJNZ	R2,$	
+	DJNZ	R1,PASSO2	
+	DJNZ	R0,PASSO1	
+	RET		
+			
+PROGRAM:	MOV	P0,#0FFh	
+	MOV	P1,#00h	
+PASSO3:	MOV	A,P0	
+	ANL	A,#14h	
+	JNZ	A,PASSO3	
+	ACALL	TEMPO	
+	MOV	A,P0	
+	ANL	A,#14h	
+	JNZ	A,PASSO3	
+	MOV	P1,A	
+	ADD	A,#01h	
+	DA	A	
+	MOV	P1,A	
+	ACALL	TEMPO2	
+	CJNE	A,#00, PASSO3	
+	END		
+
+2.3 - Faça um programa estruturado que mostre um contador de números pares crescentes nos leds, sempre
+que a chave 3 ou 4 for acionada (considerar o bounce) e desacionada. A informação sobre a contagem deve
+ser mostrada durante um período de 0,1+ 0,[número do seu grupo] segundo no conjunto de leds.
+
+.Cálculo para a rotina de 1s (TEMPO2):	
+		
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))
+		
+Sendo  Tt=1s e considerando (R1) e (R2)=256:
+		
+R0=8       00001000b	
+		
+.Cálculo  do tempo de BOUNCE (TEMPO):	
+		
+Tt=[2+5(R0)+3(R0)(R1)].10^(-6)	
+		
+Sendo  Tt=10ms e considerando (R1)=256:
+		
+R0=13-->   00001101b	
+
+
+TEMPO:	MOV	R0,#01h
+PASSO1:	MOV	R1,#0Dh
+	DJNZ	R1,$
+	DJNZ	R0,PASSO1
+	RET	
+		
+TEMPO2:	MOV	R0,#08h
+PASSO2:	MOV	R1,#00h
+PASSO3:	MOV	R2,#00h
+	DJNZ	R1,PASSO3
+	DJNZ	R0,PASSO2
+	RET	
+		
+PROGRAM:	MOV	P0,#0FFh
+	MOV	P1,#00h
+PASSO4:	MOV	A,P0
+	ANL	A,#18h
+	JNZ	A,PASSO4
+	MOV	P1,A
+	ADD	A,#02
+	MOV	P1,A
+	ADD	A,#02
+	ACALL	TEMPO2
+	MOV	P1,A
+	ACALL	TEMPO2
+	MOV	P1,#00h
+	ACALL	TEMPO2
+	CJNE	A,#00h,PASSO4
+	END	
+
+2.4 - Faça um programa estruturado que, sempre que a informação no dip switch for igual a AAh, calcule a
+quantidade de números menores e iguais a 36h + [número do seu grupo]h do buffer de memória, cujo
+endereço inicial e 40h e 0 final e 60h. 0 resultado deve 'piscar' 10 vezes com uma freqüência de 0,5
+segundo no conjunto de leds.
+
+.Cálculo para a rotina de 0.5s (TEMPO):		
+				
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))
+				
+R0=4       00000100b		
+
+
+TEMPO:	MOV	R3,#04h
+PASSO1:	MOV	R4,#00h
+PASSO2:	MOV	R5,#00h
+	DJNZ	R5,$
+	DJNZ	R4,PASSO2
+	DJNZ	R3,PASSO1
+	RET	
+		
+PROGRAM:	MOV	P0, #0FFh
+	MOV	P1,#00h
+	MOV	R0,#40h
+	MOV	R1,#21h
+	MOV	R2,#00h
+PASSO3:	MOV	A,P0
+	CLR	C
+	SUBB	A,#0AAh
+	JNZ	PASSO3
+PASSO4:	MOV	A,@R0
+	CLR	C
+	SUBB	A,#40h
+	JNC	PASSO5
+	INC	R2
+PASSO5:	INC	R0
+	DJNZ	R1, PASSO4
+	MOV	A,R2
+	MOV	R0,#0Ah
+PASSO6:	MOV	P1,A
+	ACALL	TEMPO
+	DJNZ	R0,PASSO6
+	END	
+
+2.5 - Calcule a quantidade de números impares de um buffer de memória cujo endereço inicial é 40h e o
+endereço final é 40h + [número do seu grupo]h, sempre que as chaves ligadas a porta P0 tiverem o padrão
+5Ah + [número do seu grupo]h. A quantidade de números ímpares deve ficar piscando (a cada 0,9 segundo)
+nos leds ligados a porta P1.
+
+.Cálculo para a rotina de 0.9s (TEMPO):				
+				
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))				
+				
+R0=6.8-->7       00000111b	
+
+
+TEMPO:	MOV	R0,#07h
+PASSO1:	MOV	R1,#00h
+PASSO2:	MOV	R2,$
+	DJNZ	R2,$
+	DJNZ	R1,PASSO2
+	DJNZ	R0,PASSO1
+	RET	
+		
+PROGRAM:	MOV	P0,#0FFh
+	MOV	P1,#00h
+	MOV	R0,#00h
+	MOV	R1,#09h
+	MOV	R2,#00h
+	MOV	A,#63h
+	CJNE	A,P0,$
+PASSO3:	MOV	A,@R0
+	JNB	ACC.O
+	INC	R2
+PASSO4:	INC	R0
+	DJNZ	R1,PASSO3
+	MOV	A,R2
+PASSO5:	MOV	P1,A
+	ACALL	TEMPO
+	MOV	P1,#00h
+	ACALL	TEMPO
+	SJMP	PASSO5
+	END	
+2.6-Faça um programa que mostre as seguintes informações no conjunto de leds, por 0,3 segundo, sempre
+que
+Grupo as chaves forem e que a chave estiver
+1 1 e 3 acionadas 7 Desacionada
+2 1 e 3 desacionadas 7 Acionada
+3 2 e 4 acionadas 6 Desacionada
+4 2 e 4 desacionadas 6 Acionada
+5 4 e 6 acionadas 2 Desacionada
+6 4 e 6 desacionadas 2 Acionada
+7 5 e 7 acionadas 1 Desacionada
+8 5 e 7 desacionadas 1 Acionada
+9 2 e 6 acionadas 4 Desacionada
+10 2 e 6 desacionadas 4 Acionada
+11 1 e 5 acionadas 3 Desacionada
+12 1 e 5 desacionadas 3 Acionada
+13 2 e 3 acionadas 5 Desacionada
+14 2 e 3 desacionadas 5 Acionada
+15 3 e 7 acionadas 4 Desacionada
+16 3 e 7 desacionadas 4 Acionada
+17 5 e 6 acionadas 1 Desacionada
+18 5 e 6 desacionadas 1 Acionada
+19 1 e 7 acionadas 2 Desacionada
+20 1 e 7 desacionadas 2 Acionada
+21 3 e 6 acionadas 4 Desacionada
+22 desacionadas 4 Acionada
+
+
+Led 7 Led 6 Led 5 Led 4 Led 3 Led 2 Led 1 Led 0
+0 0 0 0 0 0 0 1
+0 0 0 0 0 0 1 0
+0 0 0 0 0 1 0 0
+0 0 0 0 1 0 0 0
+0 0 0 1 0 0 0 0
+0 0 1 0 0 0 0 0
+0 1 0 0 0 0 0 0
+1 0 0 0 0 0 0 0
+
+			
+
+
+.Cálculo para a rotina de 0.3s (TEMPO):				
+				
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))				
+				
+R0=2      00000010b				
+
+
+TEMPO:	MOV	R0,#02h
+PASSO1:	MOV	R1,#00h
+PASSO2:	MOV	R2,#00h
+	DJNZ	R1,PASSO2
+	DJNZ	R0,PASSO1
+	RET	
+		
+PROGRAM:	MOV	P0,#0FFh
+	MOV	P1,#00h
+	CJNE	P0,#0Ah
+	JNB	P0.7,$
+	MOV	P1,A
+	ACALL	TEMPO
+	RL	A
+	SJMP	PASSO3
+	END	
+
+2.7 - Faça um programa que mostre as seguintes informações no conjunto de leds, por 0,25 segundo,
+sempre que as chave 3 for acionada e que a chave 7 estiver desacionada.
+Led 7 Led 6 Led 5 Led 4 Led 3 Led 2 Led 1 Led 0
+0 0 0 1 1 0 0 0
+0 0 1 0 0 1 0 0
+0 1 0 0 0 0 1 0
+1 0 0 0 0 0 0 1
+
+Grupo as chaves for e que a chave estiver
+1 a 4 3 acionada 7 Desacionada
+5 a 8 4 acionada 6 Desacionada
+9 a 12 5 acionada 4 Desacionada
+13 a 16 6 acionada 3 Desacionada
+17 a 20 7 Acionada 5 Desacionada
+21 e 22 2 acionada 1 Desacionada
+
+.Cálculo para a rotina de 0.25s (TEMPO):				
+				
+Tt=(1+(R0)+(R0)(R1)+2(R0)(R1)(R2)+2(R0)(R1)+2(R0).10^(-6))				
+				
+R0=2      00000010b				
+
+
+TEMPO:	MOV	R0,#02h
+PASSO1:	MOV	R1,#00h
+PASSO2:	MOV	R2,#00h
+	DJNZ	R2,$
+	DJNZ	R1,PASSO2
+	DJNZ	R0,PASSO1
+	RET	
+		
+PROGRAM:	MOV	P0,#0FFh
+	MOV	P1,#00h
+	MOV	A,P0
+	ANL	A,#88h
+	CJNE	A,#80h,$
+PASSO3:	MOV	P1,#18h
+	ACALL	TEMPO
+	MOV	P1,#24h
+	ACALL	TEMPO
+	MOV	P1,#42h
+	ACALL	TEMPO
+	MOV	P1,#81h
+	ACALL	TEMPO
+	SJMP	PASSO3
+	END	
+
+

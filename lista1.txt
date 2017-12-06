@@ -1,0 +1,285 @@
+1- Faça um fluxograma e um programa-fonte, em Assembly, para o 8031, que executem a operação de
+subtração entre 2 bytes localizados nos conteúdos das posições de memória cujos endereços são 5Fh e
+7Ch. O resultado deve ser armazenado no conteúdo do registrador R5 do último banco de registradores.
+
+MOV PSW, #18h
+MOV A, 5Fh
+SUBB A, 7Ch
+MOV R5, A
+
+2- Modificar o programa do item 1 para executar uma operação lógica OR-EX entre tais conteúdos.
+MOV PSW, #18h
+MOV A, 5Fh
+XRL A, 7Ch
+MOV R5, A
+
+3- Modificar o programa do item 1 para executar uma operação lógica AND entre tais conteúdos.
+
+MOV PSW, #18h
+MOV A, 5Fh
+ANL A, 7Ch
+MOV R5, A
+
+4- Motlificar o programa do item 1, considerando os conteúdos das posições de memória cujos endereços
+são 44h e 8Dh.
+
+MOV PSW, #18h
+MOV A, 44h
+SUBB A, 8Dh
+MOV R5, A
+
+5- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8051, que executem
+a operação de adição com carry bit entre 2 byles. O primeiro byte está localizado no conteúdo do
+registrador R3 do terceiro banco de registradores, e o outro byte está localizado no conteúdo da posição de
+memória cujo endereço é 38h. 0 resultado deve ser armazenado no conteúdo do registrador R2 do segundo
+banco de registradores.
+
+PROG5:	MOV	 PSW, #10h
+			MOV	 A, 38h
+			ADDC	 A, R3
+			MOV	 PSW, #08h
+			MOV	 R2, A
+			END
+
+
+6- Considerando o programa que calculava a quantidade de números menores que 38h, modifique-o, da
+forma que o buffer de memória foi modificado. Agora, ele vai do endereço 3Fh até a posição de memória
+cujo endereço é 6Ch.
+
+PROG6:	MOV	 R0, #3Fh
+			MOV	 R1, #2Eh
+			MOV	 7Bh, #00h
+	STEP1:	CLR	 C
+			MOV	 A, @R0
+			SUBB	 A, #38h
+			JNC	 STEP2
+			INC	 7Bh
+	STEP2:	INC	 R0
+			DJNZ	 R1, STEP1
+			END
+
+
+7- Considerando o programa que calculava a quantidade de números menores que 38h, modifique-o de
+maneira que ele deva armazenar o resultado no conteúdo do registrador B.
+
+PROG7:	MOV	 R0, #60h
+			MOV	 R1, #1Bh
+			MOV	 B, #00h
+	STEP1:	CLR	 C
+			MOV	 A, @R0
+			SUBB	 A, #38h
+			JNC	 STEP2
+			INC	 B
+	STEP2:	INC	 R0
+			DJNZ	 R1, STEP1
+			END	
+
+
+8- Considerando o programa que calculava a quantidade de números menores que 38h, modifique-o, de
+maneira que ele calcule a quantidade de números maiores que 6Ch.
+
+PROG8:	MOV	 R0, #60h
+			MOV	 R1, #1Bh
+			MOV	 7Bh, #00h
+	STEP1:	CLR	 C
+			MOV	 A, #6Ch
+			SUBB	 A, @R0
+			JNC	 STEP2
+			INC	 7Bh
+	STEP2:	INC	 R0
+			DJNZ	 R1, STEP1
+			END	
+
+
+9- Considerando o programa que calculava a quantidade de números menores que 38h, modifique-o de
+maneira que ele calcule a quantidade de números ímpares.
+
+PROG9:	MOV	 R0, #60h
+			MOV	 R1, #1Bh
+			MOV	 7Bh, #00h
+	STEP1:	MOV	 A, @R0
+			JNB	 ACC.O, STEP2			
+			INC	 7Bh
+	STEP2:	INC	 R0
+			DJNZ	 R1, STEP1
+			END	
+
+
+10- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8051, que calculem
+a quantidade de números pares de um buffer que vai do endereço 56h até 6Dh. O resultado deve ser
+armazenado no conteúdo da posição de memória cujo endereço é 5Ah.
+
+PROG10:	MOV	 R0, #56h
+			MOV	 R1, #18h
+			MOV	 5Ah, #00h
+	STEP1:	MOV	 A, @R0
+			JB	 ACC.O, STEP2			
+			INC	 5Ah
+	STEP2:	INC	 R0
+			DJNZ	 R1, STEP1
+			END
+
+
+
+11- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8031, que calcule a
+quantidade de números PARES E QUE SEJAM MENORES QUE 44h de um buffer de memória que vai
+do endereço 2Eh até 64h. O resultado deve ser armazenado no conteúdo da posição de memória cujo
+endereço é 12h.
+
+PROG11:	MOV	 R0, #2Eh
+			MOV	 R1, #37h
+			MOV	 12h, #00h
+	STEP1:	MOV	 R2, #00h
+			MOV	 R3, #07h
+			MOV	 A, @R0
+	STEP2:	JNB	 ACC.O, STEP3
+			INC	 R2
+	STEP3:	RR	 A
+			DJNZ	 R3, STEP2
+			JNB	 R2.0, STEP4
+			INC	 12h
+	STEP4:	INC	 R0
+			DJNZ	 R1, STEP1
+			END
+
+
+12- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8051, que calculem
+a quantidade de números que apresentam paridade par e sejam diferentes de 56h, de um buffer que vai do
+endereço 49h até 71h. O resultado deve ser armazenado no conteúdo da posição de memória cujo endereço
+é 79h.
+
+PROG12:	MOV	 R0, #49h
+			MOV	 R1, #23h
+			MOV	 79h, #00h
+	STEP1:	MOV	 R2, #00h
+			MOV	 R3, #07h
+			MOV	 A, @R0
+	STEP2:	JB	 ACC.O, STEP3
+			INC	 R2
+	STEP3:	RR	 A
+			DJNZ	 R3, STEP2
+			JB	 R2.0, STEP4
+			CLR	 C
+			MOV	 A, @R0
+			SUBB	 A, #56h
+			JNZ	 STEP4
+			INC	 79h
+	STEP4:	INC	 R0
+			DJNZ	 R1, STEP1
+			END
+
+
+13- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8051, que calculem
+a quantidade de números diferentes de zero e que apresentem o bit 5 igual a um, de um buffer de
+memória que vai do endereço 2Bh até 39h. O resultado deve ser armazenado no conteúdo da posição de
+memória cujo endereço é 6Fh
+
+PROG13:	MOV	 R0, #2Bh
+			MOV	 R1, #0Fh
+			MOV	 6Fh, #00h
+	STEP1:	MOV	 A, @R0
+			JZ	 STEP2
+			JNB	 ACC.5, STEP2
+			INC	 6Fh
+	STEP2:	INC	 R0
+			DJNZ	 R1, STEP1
+			END
+
+
+14- Resolva o Exercício 13 utilizando a instrução CJNE para fazer o controle do loop. Compare a solução
+obtida agora com a solução anterior do Exercício 13 e diga qual delas é a melhor quanto ao gasto de
+memória de programa e à velocidade de processamento
+
+PROG14:	MOV	 R0, #2Bh
+			MOV	 6Fh, #00h
+	STEP1:	MOV	 A, @R0
+			JZ	 STEP2
+			JNB	 ACC.5, STEP2
+			INC	 6Fh
+	STEP2:	INC	 R0
+			CJNE	 R0, #3Ah, STEP1
+			END
+
+
+15- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8031, que
+transformem o buffer de memória do Exercício 13 em números pares, somente para aqueles elementos do
+buffer que apresentem o bit 5 igual a 0 e sejam ímpares.
+
+PROG15:	MOV	 R0, #2Bh
+	STEP1:	MOV	 A, @R0
+			JB	 ACC.5, STEP2
+			JNB	 ACC.0, STEP2
+			CLR	 ACC.0
+	STEP2:	INC	 R0
+			CJNE	 R0, #3Ah, STEP1
+			END
+
+
+
+16- Faça um fluxograma e um programa-fonte, em Assembly, para o microcrocontrolador 8051, que
+transformem o buffer de memória do Exercício 13 em números ímpares, somente para aqueles elementos
+que apresentem paridade ímpar, apresentem o bit 1 igual a 1 e sejam menores que 44h.
+
+PROG16:	MOV	 R0, #2Bh
+	STEP1:	MOV	 R1, #00h
+			MOV	 R2, #07h
+			MOV	 A, @R0
+	STEP2:	JNB	 ACC.O, STEP3
+			INC	 R1
+	STEP3:	RR	 A
+			DJNZ	 R2, STEP2
+			JNB	 R1.0, STEP4
+			CLR	 C
+			MOV	 A, @R0
+			JNB	 ACC.1, STEP4
+			SUBB	 A, #44h
+			JNC	 STEP4
+			SETB	 ACC.0			 
+	STEP4:	INC	 R0
+			CJNE	 R0, #3Ah, STEP1
+			END
+
+
+
+17- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8051, que copiem o
+conteúdo do buffer de memória do Exercício 13 para um buffer de memória cujo endereço inicial seja 4Ah
+
+PROG17:	MOV	 R0, #2Bh
+			MOV	 R1, #4Ah
+	STEP1:	MOV	 A, @R0
+			MOV	 @R1, A
+			INC	 R1
+			INC	 R0
+			CJNE	 R0, #3Ah, STEP1
+			END
+
+
+18- Faça um fluxograma e um programa-fonte, em Assembly, para o microcontrolador 8031 que façam a
+operação lógica OR-EX dos elementos do buffer de memória do Exercício 13. O resultado deve ser
+armazenado no conteúdo do registrador RO do primeiro banco de registradores
+
+PROG18:	MOV	 PSW, #OOh 
+			MOV	 R1, #2Bh			
+			MOV	 R0, #OOh
+	STEP1:	XLR	 R0, @R1
+			INC	 R1
+			CJNE	 R1, #3Ah, STEP1
+			END
+
+
+19- Faça a operação de subtração entre dois buffers de memória. O primeiro buffer de memória começa no
+endereço 13h e termina no endereço 2Ah. O endereço inicial do segundo buffer de memória é 34h. O
+resultado deve ser colocado em um buffer de memória cujo endereço inicial seja 56h.
+
+PROG19:	MOV	 R0, #13h			
+			MOV	 R1, #34h
+			MOV	 R2, #56h 
+	STEP1:	MOV	 A, @R0
+			SUBB	 A, @R1
+			MOV	 @R2, A
+			INC	 R0
+			INC	 R1
+			INC	 R2
+			CJNE	 R0, #2Bh, STEP1
+			END
+
