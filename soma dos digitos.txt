@@ -1,0 +1,29 @@
+sumDigits :
+ 
+	SLTI $ t0 ,  $ a0 ,  1 		# se n < 1 :  $ t0 = 1 , mais $ t0 = 0 
+	beq $ t0 ,  $ de zero , cont # se n> 0 vá para continuar
+	addi $ v0 ,  $ de zero ,  0 
+	jr $ ra
+ 
+cont :
+ 
+	addi $ sp ,  $ sp ,  - 8 		# abrir espaço para dois elementos em a pilha 
+	sw $ ra ,  0 ( $ sp ) 			# salva o endereço de retorno em a pilha
+ 
+	addi $ t0 ,  $ t0 ,  10 		# set registrar $ t0 a 10 
+	div  $ a0 ,  $ t0 # divide n /  10 
+	MFLO $ t2 # quociente
+	mfhi $ t1 # restante
+ 
+	sw $ t1 ,  4 ( $ sp ) 			# loja o restante é em a pilha
+ 
+	Ori $ a0 ,  $ t2 ,  0 			# set n /  10 como o novo argumento
+	jal sumDigits # chamada sumDigits ( n /  10 )
+ 
+	lw $ ra ,  0 ( $ sp ) 			# carrega o endereço de retorno da pilha 
+	lw $ t1 ,  4 ( $ sp ) 			# carrega o restante da pilha 
+	addi $ sp ,  $ sp ,  8 		# pop da pilha
+ 
+	add  $ v0 ,  $ v0 ,  $ t1 # currentDigit + sumDigits ( n /  10 )
+ 
+	jr $ ra

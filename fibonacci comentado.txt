@@ -1,0 +1,48 @@
+# Calcula doze primeiros números de Fibonacci e colocar na matriz, em seguida, imprimir
+      . Dados
+mentiras:. palavra 0: 12 # "array" de 12 palavras para conter valores fib
+size:. palavra 12 # tamanho do "array" 
+      . Text
+      la $ t0, Fibs # carga endereço do conjunto
+      la $ t5, tamanho # endereço carga de tamanho variável
+      lw $ t5, 0 ($ t5) # carga tamanho da matriz
+      li $ t2, 1 # 1 é o primeiro e segundo Fib. número
+      add.d $ f0, $ f2, $ f4
+      sw $ t2, 0 ($ t0) # F [0] = 1
+      sw $ t2, 4 ($ T0) # F [1] = F [0] = 1
+      addi $ t1, $ t5, -2 # Contador para loop, irá executar (tamanho 2) vezes
+loop: lw $ t3, 0 ($ t0) # Pega o valor do conjunto F [n] 
+      lw $ t4, 4 ($ t0) # Pega o valor do conjunto F [n +1]
+      add $ t2, $ t3, $ t4 # $ t2 = F [n] + F [n +1]
+      sw $ t2, 8 ($ t0) # loja F [n +2] = F [n] + F [n +1] em ordem
+      addi $ t0, $ t0, 4 # endereço incremento de Fib. fonte número
+      addi $ t1, $ t1, -1 # decrementa contador de loop
+      bgtz $ t1, laço # repetir se ainda não terminou.
+      la $ a0, Fibs # primeiro argumento para impressão (array)
+      adicionar $ a1, $ zero, $ t5 # segundo argumento para impressão (tamanho)
+      jal print # chamar a rotina de impressão. 
+      li $ v0, 10 # chamada de sistema para a saída
+      syscall # estamos fora daqui.
+		
+# # # # # # # # # Rotina para imprimir os números em uma linha. 
+
+      . Dados
+espaço:. asciiz "" # espaço para inserir entre os números
+cabeça:. asciiz "Os números de Fibonacci são: \ n"
+      . Text
+imprimir: add $ t0, $ zero, $ a0 # endereço inicial da série
+      add $ t1, $ zero, $ a1 # inicializar contador de loop para tamanho da matriz
+      la $ a0, cabeça # carga endereço do print título
+      li $ v0, 4 # especificar serviço seqüência de impressão
+      syscall # imprime título
+out: lw $ a0, 0 ($ t0) # carga de números de Fibonacci para syscall
+      li $ v0, 1 # especificar Imprimir serviço Integer
+      syscall # imprime número de Fibonacci
+      la $ a0, espaço de endereço # carga de espaçador para syscall
+      li $ v0, 4 # especificar serviço seqüência de impressão
+      syscall # string de saída
+      addi $ t0, $ t0, 4 # endereço incremento
+      addi $ t1, $ t1, -1 # decrementa contador de loop
+      bgtz $ t1, fora # repetir se não terminar
+      jr $ ra # retorna
+	

@@ -1,0 +1,59 @@
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+#
+# Coluna ordem da maior travessia de 16 x 16 conjunto de palavras.
+# Pete Sanderson
+# 31 de março de 2007
+#
+# Para observar facilmente a ordem column-oriented, executar a referência de memória
+Ferramenta # Visualization com suas configurações padrão mais este programa.
+# Você pode, ao mesmo tempo ou separadamente, execute o simulador de cache de dados 
+# Sobre este programa para observar o desempenho de cache. Compara os resultados
+# Com os da linha principal-algoritmo de passagem ordem.
+#
+# O C / C + + / Java-like equivalente deste programa MIPS é:
+# Int size = 16;
+# Int [size] [size] dados;
+# Int valor = 0;
+# For (int col = 0; col <tamanho; col + +) {
+# For (int row = 0; linha <tamanho, linha + +)}
+# Data [row] [col] = valor;
+# Valor + +;
+#}
+#}
+#
+# Nota: O programa é hard-wired para a matriz de 16 x 16. Se você quiser mudar isso,
+# Três instruções precisam ser alterados.
+º 1. A matriz de armazenamento declaração de tamanho em "data:" precisa ser alterado de
+º 256 (que é 16 * 16) para colunas # * # linhas.
+º 2. O "li" para inicializar $ t0 precisa ser alterado para o novo # linhas.
+# 3. O "li" para inicializar $ t1 precisa ser alterado para o novo # colunas.
+#
+         . Dados
+Dados:. palavra 0: 256 # 16x16 matriz de palavras
+         . Text
+         li $ t0, 16 # $ t0 = número de linhas
+         li $ t1, 16 # $ t1 = número de colunas
+         mover $ s0, $ zero # $ s0 = contador de linha
+         mover $ s1, $ zero # $ s1 = contador coluna
+         mover $ t2, $ zero # $ t2 = o valor a ser armazenado
+# Cada iteração do loop irá armazenar incrementado valor R $ t1 no próximo elemento da matriz.
+# Offset é calculado a cada iteração. offset = 4 * (linha * # cols + col)
+# Nota: não é feita nenhuma tentativa de otimizar o desempenho do tempo de execução!
+loop: mult $ s0, $ t1 # $ s2 = linha * # cols (seqüência de dois instrução)
+         MFLO $ s2 # mover multiplicar resultado de registo lo para $ s2
+         adicionar R $ s2, $ s2, $ s1 # $ s2 + = col balcão
+         sll $ s2, $ s2, 2 # $ s2 = 4 * (shift 2 bits à esquerda) para compensar byte
+         sw $ t2, dados ($ s2) # armazenar o valor no elemento de matriz
+         adi $ t2, t2 $, # 1 incremento de valor a ser armazenado
+# Controle Loop: Se incrementar inferior da coluna passado, repor linha e coluna de incremento 
+# Se incrementado após a última coluna, nós terminamos.
+         addi $ s0, $ s0, um contador de linha # incremento
+         bne $ s0, $ t0, laço # não na parte inferior da coluna para loop de volta
+         mover $ s0, $ zero do contador linha # redefinição
+         addi $ s1, $ s1, 1 # incremento balcão coluna
+         bne $ s1, $ t1, laço # loop de volta se não no final da matriz (após a última coluna)
+# Terminamos atravessando a matriz.
+         li $ v0, 10 # serviço de sistema 10 é a saída
+         syscall # estamos fora daqui.
+         
+         

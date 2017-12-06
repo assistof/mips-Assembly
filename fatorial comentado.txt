@@ -1,0 +1,112 @@
+ principal
+. Dados
+  msgprompt:  . palavra  msgprompt_data
+  msgres1:  . palavra  msgres1_data
+  msgres2:  . palavra  msgres2_data
+ 
+  msgprompt_data:  . asciiz  "inteiro positivo:"
+  msgres1_data:  . asciiz  "O valor do fatorial ("
+  msgres2_data:  . asciiz  ") é"
+ 
+#  cada  função  chamada  tem  uma  pilha  seg mento  de  12  byte s ,  ou  3  palavra s.
+#  o  sp ace  é  reservado  como  segue :
+#    0 ( $ sp )  é  reservada  para  o  primeiro  valor  dado  a  esta  chamada
+#  4 ( $ sp )  é  o  sp ás  reservado  para  um  retorno  de valor
+#  8 ( $ sp )  é  o  sp ás  reservado  para  a  troca  de endereço.
+#  chamadas  podem  manipular  a sua  mãe ' s  de dados ,  mas  os pais  podem  não
+#  manipular  seus  ch ild ' s  de dados.
+#  isto é:  se  nós  temos  uma  chamada  A  que  tem  um  ch ILD  chamada  B :
+#  B  pode  executar :
+#    sw  $ t0 ,  16 ( $ sp )
+#  que  seria  armazenar  os dados  a partir de  $ t0  para  o  pai ' s  retorno  valor  registar
+#    A ,  no entanto ,  deve  não ( e ,  em  al l  casos  eu  posso  pensar  de ,  não pode )  manipular
+#    quaisquer  dados  que  pertence  a  um  ch ILD  chamada.
+ 
+ 
+. Text
+main:
+  #  imprimir  o  prompt de
+  # printf ( "número inteiro positivo:" ) ;
+  la       $ t0 ,  msgprompt     #  carga  endereço  de  msgprompt  em  $ t0
+  lw       $ a0 ,  0 ( $ t0 )        #  carga  de dados  de  endereço  em  $ t0  em  $ a0
+  li       $ v0 ,  4             #  chamada  código  para  print_string
+  syscall                    #  executar  o  print_string  syscall
+ 
+  #  lendo  a  entrada  int
+  #  scanf ( "% d" ,  e número ) ;
+  li       $ v0 ,  5             #  chamada  código  para  read_int
+  syscall                    #  executar  o  read_int  syscall
+  mover     $ t0 ,  $ v0           #  loja  entrada  em  $ t0
+ 
+  mover     $ a0 ,  $ t0           #  mover  entrada  de  argumento  registo  $ a0
+  addi     $ sp ,  $ sp ,  - 12      #  mover  stackpointer  até  3  palavra s
+  sw       $ t0 ,  0 ( $ sp )        #  loja  de entrada  no  topo  da  pilha
+  sw       $ ra ,  8 ( $ sp )        #  loja  balcão  no  fundo  da  pilha
+  jal      fatorial          #  chamar  fatorial
+ 
+  #  quando  nós  chegar  aqui ,  nós  temos  o  último  retorno  valor  em  4 ( $ sp )
+ 
+  lw       $ s0 ,  4 ( $ sp )        #  carga  última  retorno  val  em  $ s0
+ 
+  #  printf ( "O valor de 'fatorial (% d)" é:% d \ n " ,
+  la       $ t1 ,  msgres1       #  carga  msgres1  endereço  em  $ t1
+  lw       $ a0 ,  0 ( $ t1 )        #  carga  msgres1_data  valor  em  $ a0
+  li       $ v0 ,  4             #  sistema de  chamada  para  print_string
+  syscall                    #  imprime  valor  de  msgres1_data  a  tela
+ 
+  lw       $ a0 ,  0 ( $ sp )        #  carga  originais  valor  em  $ a0
+  li       $ v0 ,  1             #  sistema de  chamada  para  print_int
+  syscall                    #  imprimir  originais  valor  a  tela
+ 
+  la       $ t2 ,  msgres2       # carga  msgres2  endereço  em  $ t1
+  lw       $ a0 ,  0 ( $ t2 )        #  carga  msgres_data  valor  em  $ a0
+  li       $ v0 ,  4             #  sistema de  chamada  para  print_string
+  syscall                    #  imprime  valor  de  msgres2_data  a  tela
+ 
+  mover     $ a0 ,  $ s0           #  mover  último  retorno  valor  de  $ s0  a  $ a0  para  retorno
+  li       $ v0 ,  1             #  sistema de  chamada  para  print_int
+  syscall                    #  imprime  último  retorno  de valor  para  a tela
+ 
+  addi     $ sp ,  $ sp ,  12       #  movimento  pilha  ponteiro  de volta  para baixo  , onde  se  começou
+ 
+  #  retornar  0 ;
+  li       $ v0 ,  10            #  sistema de  chamada  de  saída
+  syscall                    #  sair !
+ 
+ 
+ 
+. Text
+fatorial:
+  #  base de   caso  -  ainda  no  pai ' s  pilha  seg mento
+  lw       $ t0 ,  0 ( $ sp )        #  carga  de entrada  do  topo  da  pilha  no  registo  $ t0
+  # se  ( x  ==  0 )
+  beq      $ t0 ,  0 ,  returnOne  #  se  $ t0  é  igual  a  0 ,  ramo  de  returnOne
+  addi     $ t0 ,  $ t0 ,  - 1       #  subtrair  1  de  $ t0  , se  não  igual  a  0
+ 
+  #  recursiva  caso  -  mover  para  esta  chamada ' s  pilha  seg mento
+  addi     $ sp ,  $ sp ,  - 12      #  mover  pilha  ponteiro  até  3  palavra s
+  sw       $ t0 ,  0 ( $ sp )        #  loja  atual  trabalhando  número  para  o  top  de  a  pilha  seg mento
+  sw       $ ra ,  8 ( $ sp )        #  loja  balcão  no  fundo  da  pilha  seg mento
+ 
+  jal      fatorial          #  recursiva  chamada
+ 
+  #  se  nós  chegar  aqui ,  então  nós  temos  a  ch ILD  retorno  valor  em  4 ( $ sp )
+  lw       $ ra ,  8 ( $ sp )        #  carga  esta  chamada ' s  $ ra  novamente ( nós  apenas  temos  de volta  a partir de  um  salto )
+  lw       $ t1 ,  4 ( $ sp )        #  carga  ch ILD " s  retorno  valor  em  $ t1
+ 
+  lw       $ t2 ,  12 ( $ sp )       #  carga  pai ' s  start  valor  em  $ t2
+#  retornar  x  *  fatorial ( x - 1 ) , (não a instrução de retorno, mas a multiplicação)
+  mul      $ t3 ,  $ t1 ,  $ t2      #  multiplicar  ch ILD 'valor de retorno s pelo pai' s  trabalhando  valor ,  loja  em  $ t3.
+ 
+  sw       $ t3 ,  16 ( $ sp )       #  ter  resultado ( em  $ t3 ),  loja  de  pai ' s  retorno  de valor.
+ 
+  addi     $ sp ,  $ sp ,  12       #  mover  stackpointer  de volta  para baixo  para  o  pai  chamada
+ 
+  jr       $ ra                #  saltar  para  pai  chamada
+ 
+. Text
+# retornar  1 ;
+returnOne:
+  li       $ t0 ,  1             #  carga  1  em  registo  $ t0
+  sw       $ t0 ,  4 ( $ sp )        #  loja  1  para  o  pai ' s  retorno  valor  registar
+  jr       $ ra                #  saltar  para  pai  chamada

@@ -1,0 +1,108 @@
+.text
+.globl main
+main:
+ 
+  lw $a1, tam   # $t0 recebe o tamanho
+  sll $0,$0,0
+  sll $0,$0,0
+ 
+  la $a0, vetor  # base de acesso a memória
+  sll $0,$0,0
+
+zero_ou_menor:
+ 
+  bltz $a1,fim  # Se menor que zero então não tem elementos no vetor
+  sll $0,$0,0
+ 
+  beq $a1,$0,fim  # Um elemento só não segue a execução
+  sll $0,$0,0
+
+enquanto:
+ 
+  beq $2,$a1,fim  # Se $2 == $a1 então encerra
+  sll $0,$0,0
+
+cons_prim:
+ 
+  mul $t0,$2,4  # pos. n do vetor mod
+  sll $0,$0,0
+  sll $0,$0,0
+ 
+  add $t0,$a0,$t0  # Soma os endereços de memória
+ 
+  lw $t1,0($t0)  # Carrega o valor n
+  sll $0,$0,0
+  sll $0,$0,0
+ 
+defc:
+ 
+  addi $3,$2,1  # pos. n+1 do vetor mod
+  sll $0,$0,0
+ 
+cons_seg:
+ 
+  beq $3,$a1,soma  # Garantia de execuação
+  sll $0,$0,0
+  sll $0,$0,0
+ 
+  mul $t0,$3,4  # Multiplica o cnteudo de 3 por 4, para conseguir a pos n+1
+  sll $0,$0,0
+  sll $0,$0,0
+ 
+  add $t0,$a0,$t0  # Soma na posição de memória
+  sll $0,$0,0
+ 
+  lw $t2,0($t0)  # Carrega o valor n+1 do vetor
+  sll $0,$0,0
+  sll $0,$0,0
+
+comp_prim_seg:
+
+  blt $t2,$t1,troca # Se v[i] < v[i-1]
+  sll $0,$0,0
+ 
+  addi $3,$3,1  # Soma1 se não for menor ou igual
+  sll $0,$0,0
+ 
+  sw $t2,0($t0)
+  sll $0,$0,0
+ 
+  j cons_seg
+  sll $0,$0,0
+
+troca:
+ 
+  sw $t1,0($t0)
+  sll $0,$0,0
+ 
+  mul $t0,$2,4
+  sll $0,$0,0
+  sll $0,$0,0
+ 
+  add $t0,$t0,$a0
+  sll $0,$0,0
+ 
+  sw $t2,0($t0)
+  sll $0,$0,0
+ 
+  addi $3,$3,1
+  sll $0,$0,0
+ 
+  j cons_seg
+  sll $0,$0,0
+ 
+soma:
+ 
+  addi $2,$2,1
+  sll $0,$0,0
+ 
+  j enquanto
+  sll $0,$0,0
+
+fim:
+  li $v0, 10 # Syscall para fim
+  syscall
+ 
+.data
+vetor: .word 4,2,1
+tam: .word 3

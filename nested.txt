@@ -1,0 +1,24 @@
+int NUM;
+double a[10][10];
+
+void init()
+{
+   int i, j;
+
+   for(i=0; i<NUM; i++)
+     for(j=0; j<NUM; j++)
+       a[i][j] = i+j;
+}
+
+
+main()
+{
+  int i, j;
+
+  NUM = 10;  
+  init();
+  
+   for(i=0; i<NUM; i++)
+     for(j=0; j<NUM; j++)
+       printf("%lf\n", a[i][j]);
+}
