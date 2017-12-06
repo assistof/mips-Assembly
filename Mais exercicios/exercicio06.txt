@@ -1,0 +1,60 @@
+#Exercicio: 06
+
+
+.data
+mens1: .asciiz "\n Digite o valor de N : "
+mens2: .asciiz "\n n! = "
+
+.text
+
+main:
+	la $a0 , mens1
+	li $v0 , 4
+	syscall
+	li $v0 , 5
+	syscall
+	addi $a0 , $v0 , 0
+	jal Fat
+	add $t0 , $zero , $v0
+	la $a0 , mens2
+	li $v0 , 4
+	syscall
+	add $a0 , $zero , $t0
+	li $v0 , 1
+	syscall
+	li $v0 , 10
+	syscall
+
+Fat:
+      addi $sp,$sp,-8   
+      sw $ra, 4($sp)   
+      sw $a0, 0($sp)   
+      slti $t0,$a0,1   
+      beq $t0,$zero,L1  
+      li $v0,1     
+      addi $sp,$sp,8  
+      jr $ra     
+
+L1:   addi $a0,$a0,-1  
+      jal Fat      
+      lw $a0, 0($sp)   
+      add $a1 , $zero , $v0
+      jal multi
+      lw $ra, 4($sp)
+      addi $sp,$sp,8  
+      jr $ra
+
+multi:
+	addi $sp ,$sp , -4
+	add $v0 , $zero , $zero
+	sw $s0 , 0($sp)
+	addi $s0 , $zero , 0
+Loop2:	slt $t0 , $s0 , $a1
+	beq $t0 , $zero , Exit2
+	add $v0 , $v0 , $a0
+	addi $s0 , $s0 , 1
+	j Loop2
+Exit2:
+	lw $s0 , 0($sp)
+	addi $sp , $sp , 4
+	jr $ra

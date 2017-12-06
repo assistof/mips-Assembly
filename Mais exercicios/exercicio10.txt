@@ -1,0 +1,50 @@
+#Exercicio 10
+
+
+.data
+
+mens1: .asciiz"\nDigite o valor de x:"
+mens2: .asciiz"\nRaiz quadrada de x ="
+mens3: .asciiz"\nNao existe raiz de numero negativo"
+
+.text
+.globl main
+
+main:
+
+addi	$v0,$zero,4
+la	$a0,mens1
+syscall
+addi	$v0,$zero,5
+syscall
+add	$s0,$zero,$v0
+
+
+slti	$t2,$s0,0
+bne	$t2,$zero,L1
+
+beq	$s0,$zero,Exit
+
+addi	$t0,$zero,1
+
+Loop:	
+	mul $t1,$t0,$t0
+	
+	beq $t1,$s0,Exit
+	addi $t0,$t0,1
+	j Loop
+
+L1:	addi	$v0,$zero,4
+	la	$a0,mens3
+	syscall
+	addi	$v0,$zero,10
+	syscall
+
+Exit:	addi	$v0,$zero,4
+	la	$a0,mens2
+	syscall
+	addi	$v0,$zero,1
+	add	$a0,$zero,$t0
+	syscall
+	
+	nop

@@ -1,0 +1,57 @@
+#Exercicio: 05
+
+.data
+
+mens1: .asciiz "\n Entre com o primeiro valor em binario : "
+mens2: .asciiz "\n Entre com o segundo valor em binario :  "
+mens3: .asciiz "\n A Distancia de Hamming entre as palavras é : "
+
+s1: .asciiz "00000000000000000000000000000000"
+s2: .asciiz "00000000000000000000000000000000"
+.text
+
+main:
+	
+	la $a0 , mens1
+	li $v0 , 4
+	syscall
+	la $a0 , s1
+	li $a1 , 32
+	li $v0 , 8	
+	syscall
+	la $s0 , s1
+	la $a0 , mens2
+	li $v0 , 4
+	syscall
+	la $a0 , s2
+	li $a1 , 32
+	li $v0 , 8	
+	syscall
+	la $s1 , s2
+	li $s3 , 0
+	li $s2 , 0
+	li $s4 , 32
+Loop:
+	slt $t0 , $s2 , $s4
+	beq $t0 , $zero , Fim
+	add $t1 , $s2 , $s0
+	add $t2 , $s2 , $s1
+	lb $t1 , 0($t1)
+	nop
+	nop
+	lb $t2 , 0($t2)
+	nop
+	nop
+	addi $s2 , $s2 , 1
+	beq $t1 , $t2 , Loop
+	addi $s3 , $s3 , 1
+	j Loop
+Fim:
+	la $a0 , mens3
+	li $v0 , 4
+	syscall
+	add $a0 , $zero , $s3
+	li $v0 , 1
+	syscall
+	li $v0 , 10
+	syscall	

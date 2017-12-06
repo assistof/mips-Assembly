@@ -1,0 +1,176 @@
+jal MAIN
+j EXIT
+
+LER_VETOR:
+	move $t0, $a0	# Copia endereco do vetor
+	li $t1, 0
+	WHILE_LER_VETOR:
+		lw $t2, 0($t0) # Indice 0
+		addi $t0, $t0, 4
+		beq $t2, $zero, LER_VETOR_EXIT
+		addi $t1, $t1, 1
+		j WHILE_LER_VETOR
+	LER_VETOR_EXIT:
+		add $v0, $zero, $t1
+		jr $ra
+
+totPC:		
+	addi $t0, $zero, 0
+	add $t0, $s0, $s1
+	add $t0, $t0, $s2
+	add $t0, $t0, $s3
+	add $t0, $t0, $s4
+	add $t0, $t0, $s5
+	add $t0, $t0, $s6
+	add $t0, $t0, $s7 # $t0 armazena o numero total de computadores	
+
+	li $v0 ,4
+	la $a0, string1
+	syscall # string "Total de computadores produzidos hoje: "		
+	li  $v0, 1           
+   	add $a0, $t0, $zero
+	syscall # exibi o total de PCS
+	
+	li $v0 ,4
+	la $a0, string4
+	syscall # espaço para melhorar visibilidade
+	jr $ra
+endPC:	
+    	
+dinPC:		
+	addi $a0, $zero, 500
+	
+	add $a1, $s5, $zero
+	jal MULTI # multiplica pc branco por 500
+	add $s5, $v0, $zero
+	
+	add $a1, $s6, $zero
+	jal MULTI # multiplica pc preto por 500
+	add $s6, $v0, $zero
+	
+	add $a1, $s0, $zero
+	jal MULTI # multiplica pc azul por 500
+	add $s0, $v0, $zero
+	
+	li $v0 ,4
+	la $a0, string2
+	syscall # exibi a string 2 total em reais das cores branca, preta e azul
+		
+	li  $v0, 1           
+   	add $a0, $s5, $zero
+	syscall # exibi o valor total de PCS branco
+	
+	li $v0 ,4
+	la $a0, string3
+	syscall # espaço
+	
+	li  $v0, 1           
+   	add $a0, $s6, $zero
+	syscall # exibi o valor total de PCS preto
+	
+	li $v0 ,4
+	la $a0, string3
+	syscall # espaço
+	
+	li  $v0, 1           
+   	add $a0, $s0, $zero
+	syscall # exibi o valor total de PCS azul
+	
+	li $v0 ,4
+	la $a0, string4
+	syscall # espaço para melhorar visibilidade
+	jr $ra
+endDin:
+
+gerDiario: 
+	addi $a0, $zero, 500
+	
+	add $a1, $t0, $zero
+	jal MULTI # multiplica o total de PCs por 500
+	add $t0, $v0, $zero 	
+	
+	li $v0 ,4
+	la $a0, string5
+	syscall # exibi a string 5		
+	li  $v0, 1           
+   	add $a0, $t0, $zero
+	syscall # exibi o valor em reais da produção diaria
+	jr $ra
+endGerDiario:
+	
+	.data
+string1:.asciiz "\nTotal de computadores produzidos hoje: "
+string2:.asciiz "Total em reais dos PCS cores branca, preta e azul: "	
+string3:.asciiz " "
+string4:.asciiz "\n\n"
+string5:.asciiz "Total geral diário em reais de todas as cores produzidas: "
+	.text
+		
+MULTI:  
+	addi $sp, $sp, -12	# Abre espa?o para 3 vari‡veis
+	sw $a0, 4($sp)		# Guarda o multiplicando
+	sw $a1, 8($sp)		# Guarda o multiplicador
+	sw $ra, 12($sp)		# Guarda o Return Address
+	add $t0, $zero, $a1	# Adiciona ˆ auxiliar t0 a vari‡vel contadora
+	add $t1, $zero, $a0	# Guarda o valor original de $a0
+	MW1:
+		beq $t0, 1, ME		# Se o contador Ž 0, sai
+		add $a0, $a0, $t1	# Soma $a0 ao seu valor original
+		addi $t0, $t0, -1	# Subtrai 1 do contador
+		j MW1			# Volta pra o la?o
+	ME:	
+		add $v0, $zero, $a0	# Adiciona ao v0 o resultado
+		lw $ra, 12($sp)		# Recupera o ra
+		lw $a1, 8($sp)		# Recupera o a1
+		lw $a0, 4($sp)		# Recupera o a0
+		addi $sp, $sp, 12	# Limpa a pilha
+		addi $t0, $zero, 0
+		addi $t1, $zero, 0
+		jr $ra			# Retorna
+
+MAIN:
+	li $s0, 0 # end vetor 1 COR AZUL
+	move $a0, $s0
+	jal LER_VETOR
+	move $s0, $v0
+	
+	li $s1, 0 # end vetor 2 COR AMARELO
+	move $a0, $s1
+	jal LER_VETOR
+	move $s1, $v0
+	
+	li $s2, 0 # end vetor 3 COR VERDE
+	move $a0, $s2
+	jal LER_VETOR
+	move $s2, $v0
+	
+	li $s3, 0 # end vetor 4 COR VERMELHO
+	jal LER_VETOR
+	move $a0, $s3
+	move $s3, $v0
+	
+	li $s4, 0 # end vetor 5 ROSA
+	jal LER_VETOR
+	move $a0, $s4
+	move $s4, $v0
+	
+	li $s5, 0 # end vetor 6 BRANCA
+	jal LER_VETOR
+	move $a0, $s5
+	move $s5, $v0
+
+	li $s6, 0 # end vetor 7 PRETA
+	jal LER_VETOR
+	move $a0, $6
+	move $s6, $v0
+	
+	li $s7, 0 # end vetor 8 MARROM
+	jal LER_VETOR
+	move $a0, $s7
+	move $s7, $v0
+	
+	jal totPC
+	jal dinPC
+	jal gerDiario
+	jr $ra
+EXIT:

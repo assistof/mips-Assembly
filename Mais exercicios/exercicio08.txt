@@ -1,0 +1,141 @@
+#Exercicio: 08
+
+
+.data
+mens1:.asciiz "Digite o numero decimal : "
+A:.asciiz"A"
+B:.asciiz"B"
+C:.asciiz"C"
+D:.asciiz"D"
+E:.asciiz"E"
+F:.asciiz"F"
+
+
+.text
+
+main:
+	la $a0 , mens1
+	li $v0 , 4
+	syscall
+	li $v0 , 5
+	syscall
+	add $s0 , $zero , $v0
+	li $s1 , 65536
+Loop:
+	addi $t0 , $zero , -1
+	beq $t0 , $s1 , Exit
+
+	slt $t0 , $s0 , $s1
+	bne $t0 , $zero , Else
+	add $a0 , $zero , $s0
+	add $a1 , $zero , $s1
+	jal Div
+	add $s2 , $zero , $v0
+	add $s0 , $zero , $v1
+	
+	addi $t1 , $zero , 10
+	slt $t1 , $s2 , $t1
+	beq $t1 , $zero , L1
+	add $a0 , $s2 , $zero
+	li $v0 , 1
+	syscall	
+	j Else
+L1:
+	addi $t1 , $s2 , -10
+	bne $t1 , $zero , L2
+	la $a0 , A
+	li $v0 , 4
+	syscall	
+	j Else
+L2:
+	addi $t1 , $s2 , -11
+	bne $t1 , $zero , L3
+	la $a0 , B
+	li $v0 , 4
+	syscall	
+	j Else
+L3:
+	addi $t1 , $s2 , -12
+	bne $t1 , $zero , L4
+	la $a0 , C
+	li $v0 , 4
+	syscall
+	j Else	
+L4:
+	addi $t1 , $s2 , -13
+	bne $t1 , $zero , L5
+	la $a0 , D
+	li $v0 , 4
+	syscall	
+	j Else
+L5:
+	addi $t1 , $s2 , -14
+	bne $t1 , $zero , L6
+	la $a0 , E
+	li $v0 , 4
+	syscall
+	j Else
+L6:
+	addi $t1 , $s2 , -16
+	bne $t1 , $zero , Else
+	la $a0 , F
+	li $v0 , 4
+	syscall		
+Else:
+	addi $t0 , $zero , 1
+	bne $s1 , $t0 , Lt
+	addi $s1 , $zero , -1
+	j Loop
+Lt:
+	add $a0 , $zero , $s1
+	addi $a1 , $zero , 16
+	jal Div
+	nop
+	add $s1 , $zero , $v0
+	j Loop
+
+Exit:
+	li $v0 , 10
+	syscall
+
+
+Div:
+	addi $sp , $sp , -12
+	sw $s0 , 0($sp)
+	sw $a0 , 4($sp)
+	sw $ra , 8($sp)
+	li $s0 , -1
+	li $t0 , 0
+	add $t2 , $zero , $a0
+LoopD:
+	addi $s0 , $s0 , 1
+	add $a0 , $zero , $s0
+	jal multi
+	sub $t0 , $t2 , $v0
+	slt $t1 , $t0 , $zero
+	bne $t1 , $zero , FimD
+	add $v1 , $zero , $t0	
+	j LoopD
+FimD:
+	addi $s0 , $s0 , -1
+	add $v0 , $zero , $s0
+	lw $s0 , 0($sp)
+	lw $a0 , 4($sp)
+	lw $ra , 8($sp)
+	addi $sp , $sp , 12
+	jr $ra
+
+multi:
+	addi $sp ,$sp , -4
+	add $v0 , $zero , $zero
+	sw $s0 , 0($sp)
+	addi $s0 , $zero , 0
+LoopM:	slt $t0 , $s0 , $a1
+	beq $t0 , $zero , FimM
+	add $v0 , $v0 , $a0
+	addi $s0 , $s0 , 1
+	j LoopM
+FimM:
+	lw $s0 , 0($sp)
+	addi $sp , $sp , 4
+	jr $ra

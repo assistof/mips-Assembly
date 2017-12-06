@@ -1,0 +1,59 @@
+.data
+frase1: 	.asciiz "Informe o Peso em Kg: "					
+frase2: 	.asciiz "Informe a Altura em M: "					
+pularalinha:	.asciiz "\n\n"							
+resultadol:	.asciiz "O IMC eh: "						
+error:	.asciiz "O divisor não pode ser 0.\n"                          
+eol: 	.asciiz "\n"
+.text
+
+main: 
+	li $v0, 4  		
+	la $a0, frase1	
+	syscall			
+	li $v0, 6		
+	syscall			
+	mov.s $f1,$f0		
+
+term2:	li $v0, 4  		
+	la $a0, frase2		
+	syscall			
+	li $v0, 6		
+	syscall			
+	mov.s $f3,$f0		
+
+multi:	mul.s $f6, $f3, $f3	
+
+divi:	c.eq.s $f6,$f10		
+	bc1t  errdiv		
+	div.s $f5, $f1, $f6	
+	jal print		
+
+errdiv:	li $v0,31		
+	la $a0,	61		
+	la $a1, 1000		
+	la $a2, 7		
+	la $a3, 127		
+	syscall			
+	li $v0, 4  		
+	la $a0, error		
+	syscall				
+	jal	term2		
+
+print:	li $v0,31		
+	la $a0,	70		
+	la $a1, 1000		
+	la $a2, 0		
+	la $a3, 127		
+	syscall			
+	li $v0,4		
+	la $a0, resultadol	
+	syscall			
+	li $v0,2		
+	mov.s $f12, $f5		
+	syscall			
+	li $v0,4		
+	la $a0, pularalinha	
+	syscall			
+	jal main	
+	

@@ -1,0 +1,67 @@
+#Exercicio 02
+
+.data
+a: .word 0 0 0 0 0 0 0 0 0 0
+mens1: .asciiz "\n Digite um valor : "
+mens2: .asciiz "\n Maior : "
+mens3: .asciiz "\n Menor : "
+mens4: .asciiz "\n Maior Absoluto : "
+
+.text
+
+main:
+	li $s0 , 0
+	la $a0 , mens1
+	addi $s1 , $zero , -32768
+	addi $s2 , $zero , 32767
+	la $s3 , a
+Loop:
+	slti $t0 , $s0 , 10
+	beq $t0 , $zero , Exit
+	add $t0 , $s0 , $s0 
+	add $t0 , $t0 , $t0
+	add $t0 , $t0 , $s3
+	li $v0 , 4
+	syscall
+	li $v0 , 5
+	syscall
+	sw $v0 , 0($t0)
+	slt $t0 , $s1 , $v0
+	beq $t0 , $zero , SaiIf1
+	add $s1 , $zero , $v0
+SaiIf1:
+	slt $t0 , $v0 , $s2
+	beq $t0 , $zero , SaiIf2
+	add $s2 , $zero , $v0	
+	SaiIf2:
+	addi $s0 , $s0 , 1
+	j Loop
+
+Exit:
+	add $s4 , $s2 , $s2
+	sub $s4 , $s2 , $s4
+	slt $t1 , $s4 , $s1
+	add $s4 , $zero , $s2
+	beq $t1 , $zero , SaiIf3
+	add $s4 , $zero , $s1
+SaiIf3:
+	li $v0 , 4
+	la $a0 , mens2
+	syscall
+	add $a0 , $zero , $s1
+	li $v0 , 1
+	syscall
+	addi $v0 , $zero , 4
+	la $a0 , mens3
+	syscall
+	add $a0 , $zero , $s2
+	li $v0 , 1
+	syscall
+	la $a0 , mens4
+	li $v0 , 4
+	syscall
+	li $v0 , 1
+	addi $a0 , $s4 , 0
+	syscall
+	li $v0 , 10
+	syscall
