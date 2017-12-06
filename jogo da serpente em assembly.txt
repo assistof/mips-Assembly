@@ -1,0 +1,485 @@
+# MIPS programa de montagem escrito por D.Taylor ser cobra.
+
+. Dados
+# Guarde todos os dados importantes e começando nesta seção, e fazer quaisquer outras notas necessárias
+# Mesmo que não endup enormes sendo enourmous.
+
+stageWidth:. metade 32 # Loja tamanho do palco
+stageHeight: 32. meia configurações # Usual $ gp, 32x32, 16xScaling, 512x512
+
+headX:. metade 5 # loja jogador possition na memória
+inebriante:. metade 5	
+tailX:. metade 4
+taily: metade 5.
+
+tailSize:. palavra 3 # Loja tamanho inicial da cauda do jogador
+
+DefaultDir:. palavra 0x01000000 # loja padrão dir como direito
+
+food01X:. meia 30 # possitions Store 'alimentos intial na memória
+food01Y: metade 30.
+food02X:. metade 60
+food02Y: meia de 60 anos.
+	
+drawColour:. palavra 0x0022CC22 # Loja de cor para desenhar objetos
+bgColour:. palavra 0xFF003300 # Loja de cor para desenhar fundo
+
+# Devo explicar neste ponto que eu vou estar usando o canal alfa de outra forma não utilizada (mais à esquerda de dois bytes) para armazenar informações complementares sobre cada telha.
+							# Alpha significados canais (00 a FF) Note-se também:
+							# 00-31 matar jogador
+								# 00 = parede
+								# 01 = cobra direito movendo
+								# 02 = cobra subir
+								# 03 = cobra movendo para a esquerda
+								# 04 = cobra se movendo para baixo
+							# 32 a 3B crescer jogador
+								# 32 = comida
+							# FF é espaço vazio
+							
+. Text
+# Principais e outros métodos aqui. Esperemos que eles vão cooperar e jogar bem, porque
+# Eu realmente quero jogar snake, e há definitivamente não cobra nenhum clones disponíveis em outros lugares ...
+Principal:
+			# Semente gerador de números pseudo-aleatórios com uma bytes mais baixos da ordem de relógio do sistema
+			Ori $ v0, $ zero, 30, Recuperar a hora do sistema
+			syscall
+			ou US $ a1, $ zero, $ a0 # Mova os bytes de baixa ordem para a1
+			Ori $ a0, $ zero, 1 # Set gerador de números
+			Ori $ v0, $ zero, 40 # Semente do gerador com ele
+			syscall				
+
+Main_init:
+			# Carga jogador Informações
+			lh $ a0, headX # Obter cabeça possition do jogador
+			lh $ a1, inebriante			
+			jal CoordsToAddress # Calcular possition na memória fase
+			nop
+			ou US $ s0, $ zero, $ v0 # loja possition memória fase s0
+			
+			lh $ a0, tailX # Obter possition cauda do jogador
+			lh $ a1, taily			
+			jal CoordsToAddress # Calcular possition na memória fase
+			nop
+			ou possition memória $ s1, $ zero, $ v0 # loja fase s1
+			
+			lw $ s3, tailSize # Loja tamanho da cauda # in s3
+			
+			lw $ s4, DefaultDir # loja padrão dir em s4
+			
+			
+			# Carregar Informações cor
+			lw $ s6, drawColour # loja cor de desenho em S6
+			lw $ s7, bgColour # loja cor de fundo na s7
+
+
+			# Prepare a arena
+			ou US $ a0, $ zero, $ s7 # Limpar palco para cor de fundo
+			jal FillMemory
+			nop
+			jal AddBoundaries # Adicione paredes
+			nop
+			
+			# Desenhe cabeça inicial do jogador
+			ou US $ a0, $ zero, $ # s6 carga desenhar cor	
+			ou possition $ a1, $ zero, $ s0 # Carga
+			jal PaintMemory # Chama a função de pintura
+			nop
+			# Desenhe cauda inicial do jogador
+			Ori $ a0, $ s6, 0x01000000 # Carga cor empate e anexar bytes movimento certas
+			ou possition $ a1, $ zero, $ s1 # Carga
+			jal PaintMemory # Chama a função de pintura
+			nop
+
+			# Desenhe comida inicial
+			jal GetFoodPos # Obter uma possition aleatório para o novo alimento
+			nop
+			Ori $ a0, $ zero, 0x32FFFFFF # Carga branco como a cor e anexar os bytes de alimentos
+			ou US $ a1, $ zero, $ v0 # Carrega possition
+			jal PaintMemory # Chama a função de pintura
+			nop
+			
+
+Main_waitLoop:
+			# Esperar para o jogador pressionar uma tecla
+			jal do sono # zzzzzzzzzzz ...
+			nop
+			lw $ t0, 0xFFFF0000 # Recupera o controle transmissor bit pronto
+			blez $ t0, Main_waitLoop # Verificar se uma tecla foi pressionada
+			nop
+Main_gameLoop:
+			# Loop do jogo principal no qual o programa deve passar a maior parte de seu tempo
+			jal do sono # sono por 60 milisegundos para que o jogo é jogável
+			nop
+			
+			blez $ s3, Main_tailBegin # Saltar a remoção da cauda se o alimento foi pego anteriormente
+			nop				
+			subi $ s3, $ s3, 1 # Tome um dos alimentos pick-up
+			b Main_skipTail # Ir para pular reduzindo o comprimento da cauda
+			nop
+Main_tailBegin:
+			lw $ t7, ($ s1) # dados de cor cauda de backup
+			ou US $ a0, $ zero, $ s7 # Retire cauda pedaço
+			ou addresss $ a1, $ zero, $ s1 # Carga
+			jal PaintMemory # Chama a função de pintura
+			nop
+			
+			srl $ t7, $ t7, 24, Extrato de byte direção a partir de dados de cores da cauda
+			ou US $ a0, $ zero, $ s1 # Set a0 para possition atual
+			ou US $ a1, $ zero, 1 # Definir distância de um
+			
+							# Mudar para mudar o endereço de memória cauda na direção correta
+Main_tailRight:
+			bne, $ t7, 0x00000001, Main_tailUp
+			nop
+			jal MoveRight # Direito
+			nop
+			j Main_tailDone
+			nop
+Main_tailUp:
+			bne, $ t7, 0x00000002, Main_tailLeft
+			nop
+			jal MoveUp # Up
+			nop
+			j Main_tailDone
+			nop
+Main_tailLeft:
+			bne, $ t7, 0x00000003, Main_tailDown
+			nop
+			jal MoveLeft # Esquerda
+			nop
+			j Main_tailDone
+			nop
+Main_tailDown:
+			bne, $ t7, 0x00000004, Main_tailNone
+			nop
+			jal MoveDown # Abaixo
+			nop
+			j Main_tailDone
+			nop
+Main_tailNone:
+			Ori $ v0, $ zero, 10 # syscall terminar
+			syscall
+Main_tailDone:
+			ou US $ s1, $ zero, $ v0 # loja New possition cauda do jogador
+			
+Main_skipTail:
+			# Agora é hora de mudar a cabeça do jogador
+			jal GETDIR # Obter direção do teclado
+			nop
+			ou US $ t6, $ zero, $ v0 # direção de backup a partir do teclado
+			
+			ou US $ a0, $ zero, $ s0 # Carga possition
+			Ori $ a1, $ zero, 1 # Definir distância para mover
+			
+			# Mudar para mudar o endereço de memória cabeça na direção correta
+Main_headRight:
+			bne, $ t6, 0x01000000, Main_headUp
+			nop
+			jal MoveRight # Direito
+			nop
+			j Main_headDone
+			nop
+Main_headUp:
+			bne, $ t6, 0x02000000, Main_headLeft
+			nop
+			jal MoveUp # Up
+			nop
+			j Main_headDone
+			nop
+Main_headLeft:
+			BNE, $ t6, 0x03000000, Main_headDown
+			nop
+			jal MoveLeft # Esquerda
+			nop
+			j Main_headDone
+			nop
+Main_headDown:
+			bne, $ t6, 0x04000000, Main_headNone
+			nop
+			jal MoveDown # Abaixo
+			nop
+			j Main_headDone
+			nop
+Main_headNone:
+			ou US $ t6, $ zero, $ s4 # default para a direção anterior
+			b Main_headRight
+			nop
+Main_headDone:
+			
+			ou US $ s4, $ zero, $ t6 # backup nova direção como a direção anterior
+			add $ a0, $ s6, $ t6 # Redesenhar possition atual com a direção liderada nos bytes alfa
+			ou US $ a1, $ zero, $ s0		
+			jal PaintMemory
+			nop
+					
+									
+			ou US $ s0, $ zero, $ v0 # loja New possition cabeça do jogador
+			
+			lw $ t0, ($ s0) # Verificar o estado de telha se mudou para
+			srl $ t0, $ t0, 24
+			ble $ t0, 0x31, Main_reset # Saia se é uma parede
+			nop
+			blt $ t0, 0x32, Main_noFood # Saltar a adição aos alimentos, se não é comida
+			nop
+			BGT $ t0, 0x3B, Main_noFood
+			nop
+			addiu $ s3, $ s3, 2 # Caso contrário, adicione 2 a registro alimentar - o que irá estender a cobra de dois pixels na próxima iteração
+			
+			# Atrair novos alimentos
+			jal GetFoodPos
+			nop
+			Ori $ a0, $ zero, 0x32FFFFFF # Definir a cor para branco com alimentos alfa bytes
+			ou US $ a1, $ zero, $ v0
+			jal PaintMemory
+			nop
+Main_noFood:
+			ou US $ a0, $ zero, $ s6 # Desenhe novo possition cabeça
+			ou US $ a1, $ zero, $ s0
+			jal PaintMemory
+			nop
+			
+			b Main_gameLoop # laço em volta novamente para continuar o jogo
+			nop
+
+Main_reset:
+			# Você morreu. Oh morto: C
+			Ori $ v0, $ zero, 32 # syscall sono
+			Ori $ a0, $ zero, 1200 # Por isso muitas milisegundos
+			syscall
+			b principal
+			nop
+Main_exit:
+			Ori $ v0, $ zero, 10 # syscall terminar
+			syscall
+			
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Sono função de loop do jogo
+# Toma nenhum
+# Retorna nenhum
+Dormir:
+			Ori $ v0, $ zero, 32 # syscall sono
+			Ori $ a0, $ zero, 60 # Por isso muitas milisegundos
+			syscall
+			jr $ ra # Retorna
+			nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para converter coordenadas em endereços de memória estágio
+# Toma a0 = x, y = a1
+# Retorna v0 = endereço
+CoordsToAddress:
+		ou US $ v0, $ zero, $ a0 # Mova x coordenar a v0
+		lh $ a0, stageWidth # Coloque a largura da tela em a0
+		multu $ a0, $ a1 # Multiplique y coordenada pela largura da tela
+		nop
+		MFLO $ a0 # Recupera resultam lo registo
+		addu $ v0, $ v0, $ a0 # Adicione o resultado ao coordenada e armazenar em v0 x
+		sll $ v0, $ v0, 2 # v0 Multiplique por 4 (bytes) com um deslocamento lógico
+		addu $ v0, $ v0, $ gp # Adicionar gp para v0 para dar o endereço de memória fase
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para desenhar a determinada cor para um determinado endereço de memória fase (gp)
+# Toma a0 = cor, a1 = endereço
+# Retorna nenhum
+PaintMemory:
+		sw $ a0, ($ a1) # Definir cor
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para mover um determinado endereço de memória à direita do palco por um determinado número de peças
+# Toma a0 = endereço, a1 = distância
+# Retorna v0 = new address
+MoveRight:
+		# Endereço + (distância * largura * 4)
+		ou US $ v0, $ zero, $ a0 # Mova endereço para v0
+		SLL $ a0, $ a1, 2 # Multiplique a distância por 4 usando uma mudança de lógica
+		add $ v0, $ v0, $ a0 # Adicione resultado para v0
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para mover um determinado endereço de memória palco por um determinado número de peças
+# Toma a0 = endereço, a1 = distância
+# Retorna v0 = new address
+MoveUp:
+		ou US $ v0, $ zero, $ a0 # Mova endereço para v0
+		lh $ a0, stageWidth # Coloque a largura da tela em a0
+		multu $ a0, $ a1 # Multiplique a distância por largura da tela
+		nop
+		MFLO $ a0 # Recupera resultam lo registo
+		SLL $ a0, $ a0, 2 # Multiply v0 por 4 usando uma mudança de lógica
+		subu $ v0, $ v0, $ a0 # Adicione resultado para v0
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para mover um determinado endereço de memória fase deixado por um determinado número de peças
+# Toma a0 = endereço, a1 = distância
+# Retorna v0 = new address
+MoveLeft:
+		ou US $ v0, $ zero, $ a0 # Mova endereço para v0
+		SLL $ a0, $ a1, 2 # Multiplique a distância por 4 usando uma mudança de lógica
+		subu $ v0, $ v0, $ a0 # Subtrair resultado de v0
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para mover um determinado endereço de memória palco para baixo por um determinado número de peças
+# Toma a0 = endereço, a1 = distância
+# Retorna v0 = new address
+MoveDown:
+		ou US $ v0, $ zero, $ a0 # Mova endereço para v0
+		lh $ a0, stageWidth # Coloque a largura da tela em a0
+		multu $ a0, $ a1 # Multiplique a distância por largura da tela
+		nop
+		MFLO $ a0 # Recupera resultam lo registo
+		SLL $ a0, $ a0, 2 # Multiply v0 por 4 usando uma mudança de lógica
+		addu $ v0, $ v0, $ a0 # Subtrair resultado de v0
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para recuperar a entrada do kyboard e devolvê-lo como um canal alfa direção
+# Toma nenhum
+# Retorna v0 = direção
+GETDIR:
+		lw $ t0, 0xFFFF0004 # Carga valor de entrada
+		
+GetDir_right:
+		bne, $ t0, 100, GetDir_up
+		nop
+		Ori $ v0, $ zero, 0x01000000 # Direito
+		j GetDir_done
+		nop
+GetDir_up:
+		bne, $ t0, 119, GetDir_left
+		nop
+		Ori $ v0, $ zero, 0x02000000 # Up
+		j GetDir_done
+		nop
+GetDir_left:
+		bne, $ t0, 97, GetDir_down
+		nop
+		Ori $ v0, $ zero, 0x03000000 # Esquerda
+		j GetDir_done
+		nop
+GetDir_down:
+		bne, $ t0, 115, GetDir_none
+		nop
+		Ori $ v0, $ zero, 0x04000000 # Abaixo
+		j GetDir_done
+		nop
+GetDir_none:
+						# Não fazer nada
+GetDir_done:
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para encher a memória de fase com uma dada cor
+# Toma a0 = cor
+# Retorna nenhum
+FillMemory:
+		lh $ a1, stageWidth # Calcular terminando possition
+		lh $ a2, stageHeight
+		multu $ a1, $ a2 # Multiplique a largura da tela por altura da tela
+		nop
+		MFLO $ a2 # recuperá telhas totais
+		sll $ a2, $ a2, 2 # Multiplique por 4
+		adicionar R $ a2, $ a2, $ gp # Adicionar ponteiro global
+		
+		ou US $ a1, $ zero, $ var gp # Definir loop para ponteiro global
+FillMemory_l:	
+		sw $ a0, ($ a1)
+		adicionar R $ a1, $ a1, 4
+		blt $ a1, $ a2, FillMemory_l
+		nop
+		
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para adicionar paredes de contorno
+# Toma nenhum
+# Retorna nenhum
+AddBoundaries:
+		lh $ a1, stageWidth # Calcular terminando possition
+		sll $ a1, $ a1, 2 # Multiplique por 4
+		adicionar R $ a2, $ a1, $ gp # Adicionar ponteiro global
+		
+		ou US $ a1, $ zero, $ var gp # Definir loop para ponteiro global
+AddBoundaries_t:	
+		sw $ s6, ($ a1)
+		adicionar R $ a1, $ a1, 4
+		blt $ a1, $ a2, AddBoundaries_t
+		nop
+		
+
+		lh $ a1, stageWidth # Calcular seguinte condição final
+		lh $ a2, stageHeight
+		multu $ a1, $ a2 # Multiplique a largura da tela por altura da tela
+		nop
+		MFLO $ a2 # recuperá telhas totais
+		sub $ a2, $ a2, $ a1 # Minus uma largura
+		sll $ a2, $ a2, 2 # Multiplique por 4
+		adicionar R $ a2, $ a2, $ gp # Adicionar ponteiro global
+		
+		subi $ a1, $ a1, 1 # Tome 1 de largura
+		sll $ a3, $ a1, 2 # Multiplique por 4 para obter mem para adicionar
+		
+		ou US $ a1, $ zero, $ var gp # Definir loop para ponteiro global
+AddBoundaries_s:	
+		sw $ s6, ($ a1)
+		adicionar R $ a1, $ a1, $ a3
+		sw $ s6, ($ a1)
+		adicionar R $ a1, $ a1, 4
+		blt $ a1, $ a2, AddBoundaries_s
+		nop
+		
+		ou US $ a3, $ zero, $ a1 # backup (possition atual) a1
+		
+		lh $ a1, stageWidth # Calcular possition final do término
+		lh $ a2, stageHeight
+		multu $ a1, $ a2 # Multiplique a largura da tela por altura da tela
+		nop
+		MFLO $ a2 # recuperá telhas totais
+		sll $ a2, $ a2, 2 # Multiplique por 4
+		adicionar R $ a2, $ a2, $ gp # Adicionar ponteiro global
+		
+		ou US $ a1, $ zero, $ a3 # restaurar possition anterior
+AddBoundaries_b:
+		sw $ s6, ($ a1)
+		adicionar R $ a1, $ a1, 4
+		blt $ a1, $ a2, AddBoundaries_b
+		nop
+
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Função para retornar um endereço viável para um novo pedaço de comida
+# Toma nenhum
+# Retorna v0 = endereço viável
+GetFoodPos:
+		lh $ a1, stageWidth # Calcule o máximo
+		lh $ a2, stageHeight
+		multu $ a1, $ a2 # Multiplique a largura da tela por altura da tela
+		nop
+		MFLO $ a3 # recuperá telhas totais
+		sub $ a3, $ a3, 2, para tomar dois limites de largura
+		sub $ a3, $ a3, $ a2 # tomar duas larguras de palco para os limites de altura
+		sub $ a3, $ a3, $ a2
+		
+GetFoodPos_tryAgain:	
+		Ori $ v0, $ zero, 42 # usar syscall 42 para obter um número inteiro aleatório sob este número
+		Ori $ a0, $ zero, 1
+		ou US $ a1, $ zero, $ a3
+		syscall
+		
+		add $ v0, $ a0, 1 ??# add 1 para largura da borda
+		add $ v0, $ v0, $ a2 # adiciona uma largura de fronteira altura
+		
+		sll $ v0, $ v0, 2, multiplique por quatro para o tamanho da palavra
+		add $ v0, $ v0, $ gp # adicionar ponteiro global
+		
+		lw $ t0, ($ v0) # Verificar o estado de telha escolhida ao acaso
+		srl $ t0, $ t0, 24
+		bne $ t0, 0xFF, GetFoodPos_tryAgain # Tente encontrar um local diferente, este é levado
+		nop
+		
+		jr $ ra # Retorna
+		nop
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
